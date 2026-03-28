@@ -1,0 +1,26 @@
+// Quiq Labs — QuiqImage
+// This is the single source of truth for the database schema.
+// Keep this file well-commented — Claude uses these comments as context
+// when generating queries, API routes, and UI components.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Example model — replace with your actual models ──
+
+/// A user of the application.
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
