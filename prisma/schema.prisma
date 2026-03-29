@@ -12,15 +12,93 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ── Example model — replace with your actual models ──
+// ── Enums ──
+
+enum RecurrenceFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum RecurrenceEndType {
+  NEVER
+  AFTER_COUNT
+  ON_DATE
+}
+
+// ── Models ──
+
+/// Stores the recurrence pattern for a repeating todo.
+model RecurrenceRule {
+  id            String              @id @default(cuid())
+  frequency     RecurrenceFrequency
+  interval      Int                 @default(1)
+  daysOfWeek    Int[]               @map("days_of_week") // 0=Sun..6=Sat, for WEEKLY
+  endType       RecurrenceEndType   @map("end_type")
+  endAfterCount Int?                @map("end_after_count")
+  endDate       DateTime?           @map("end_date")
+  createdAt     DateTime            @default(now()) @map("created_at")
+
+  todos Todo[]
+
+  @@map("recurrence_rules")
+}
 
 /// A user of the application.
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String?
+  password  String
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  categories      Category[]
+  todos           Todo[]
+
   @@map("users")
+}
+
+/// A personal grouping for todos owned by a user.
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  todos Todo[]
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@map("categories")
+}
+
+/// A task with due date and completion state.
+model Todo {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  dueDate     DateTime  @map("due_date")
+  done        Boolean   @default(false)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  categoryId String?   @map("category_id")
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  recurrenceRuleId   String?         @map("recurrence_rule_id")
+  recurrenceRule     RecurrenceRule? @relation(fields: [recurrenceRuleId], references: [id], onDelete: SetNull)
+  isRecurrenceParent Boolean         @default(false) @map("is_recurrence_parent")
+
+  @@index([userId])
+  @@index([dueDate])
+  @@index([recurrenceRuleId])
+  @@map("todos")
 }

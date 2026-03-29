@@ -1,6 +1,6 @@
 # QuiqImage
 
-A Quiq Labs web application built with the Quiq Labs tech stack: Next.js, TypeScript, Prisma, PostgreSQL, Tailwind CSS, and Docker.
+A simple authenticated To Do web app built with Next.js, TypeScript, Prisma, PostgreSQL, Tailwind CSS, and Docker.
 
 ## Prerequisites
 
@@ -25,14 +25,22 @@ docker compose up -d
 # 4. Install dependencies
 npm install
 
-# 5. Create the database and run migrations
-npx prisma migrate dev --name init
+# 5. Sync the database schema
+npx prisma db push
 
 # 6. Start the dev server
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to see the app.
+
+## Features
+
+- Email/password authentication
+- Create categories
+- Create todos with title, description, and due date
+- Mark todos done with a check mark
+- Calendar view with todos on their due dates
 
 ## Available Scripts
 
@@ -117,8 +125,7 @@ docker run -p 3000:3000 -e DATABASE_URL="your-production-db-url" quiqimage
 | Variable | Description | Default |
 |---|---|---|
 | `DATABASE_URL` | PostgreSQL connection string | See `.env.example` |
-| `NEXTAUTH_SECRET` | Secret for NextAuth.js sessions | Generate with `openssl rand -base64 32` |
-| `NEXTAUTH_URL` | App URL for NextAuth.js | `http://localhost:3000` |
+| `SESSION_SECRET` | Secret used to sign login session cookies | Generate with `openssl rand -base64 32` |
 
 ---
 
